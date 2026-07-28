@@ -1,0 +1,25 @@
+{
+  "name": "youtube-tracker",
+  "version": "1.0.0",
+  "description": "[![My Activity](https://shigure-683956955842.europe-west1.run.app/activity/svg?id=meep)](https://www.joshuadematas.me)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tifye/youtube-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tifye/youtube-tracker/issues"
+  },
+  "homepage": "https://github.com/tifye/youtube-tracker#readme",
+  "devDependencies": {
+    "@types/chrome": "^0.2.2",
+    "typescript": "^7.0.2"
+  }
+}

@@ -10,10 +10,24 @@
 
 <body class="bg-stone-200 px-8 py-6 font-sans text-indigo-950">
     <form class="flex flex-col gap-6">
+        <label class="group relative flex flex-row items-center gap-2 bg-stone-100 shadow-md w-full rounded-sm px-2 py-2">
+            <input type="checkbox" id="devMode" name="devMode" class="outline-none accent-amber-500" />
+            <span class="text-sm">Dev mode</span>
+            <div
+                class="w-2 absolute right-full top-0 mr-2 h-full rounded-full bg-indigo-500 group-focus-within:bg-amber-500 group-focus-within:scale-y-110 transition-all">
+            </div>
+        </label>
+        <label class="group relative flex flex-row items-center gap-2 bg-stone-100 shadow-md w-full rounded-sm px-2 py-2">
+            <input type="checkbox" id="privateMode" name="privateMode" class="outline-none accent-amber-500" />
+            <span class="text-sm">Private mode (don't report activity)</span>
+            <div
+                class="w-2 absolute right-full top-0 mr-2 h-full rounded-full bg-indigo-500 group-focus-within:bg-amber-500 group-focus-within:scale-y-110 transition-all">
+            </div>
+        </label>
         <div class="group relative">
             <div class="bg-stone-100 shadow-md w-full rounded-sm px-2 pb-2 outline-none text-indigo-950">
-                <label for="token" class="block text-sm">API Token</label>
-                <input type="text" id="token" name="token" class="outline-none w-full" />
+                <label for="prodBackend" class="block text-sm">Prod Backend</label>
+                <input type="text" id="prodBackend" name="prodBackend" class="outline-none w-full" />
             </div>
             <div
                 class="w-2 absolute right-full top-0 mr-2 h-full rounded-full bg-indigo-500 group-focus-within:bg-amber-500 group-focus-within:scale-y-110 transition-all">
@@ -21,8 +35,26 @@
         </div>
         <div class="group relative">
             <div class="bg-stone-100 shadow-md w-full rounded-sm px-2 pb-2 outline-none text-indigo-950">
-                <label for="backend" class="block text-sm">Backend</label>
-                <input type="text" id="backend" name="backend" class="outline-none w-full" />
+                <label for="prodToken" class="block text-sm">Prod API Token</label>
+                <input type="text" id="prodToken" name="prodToken" class="outline-none w-full" />
+            </div>
+            <div
+                class="w-2 absolute right-full top-0 mr-2 h-full rounded-full bg-indigo-500 group-focus-within:bg-amber-500 group-focus-within:scale-y-110 transition-all">
+            </div>
+        </div>
+        <div class="group relative">
+            <div class="bg-stone-100 shadow-md w-full rounded-sm px-2 pb-2 outline-none text-indigo-950">
+                <label for="devBackend" class="block text-sm">Dev Backend</label>
+                <input type="text" id="devBackend" name="devBackend" class="outline-none w-full" />
+            </div>
+            <div
+                class="w-2 absolute right-full top-0 mr-2 h-full rounded-full bg-indigo-500 group-focus-within:bg-amber-500 group-focus-within:scale-y-110 transition-all">
+            </div>
+        </div>
+        <div class="group relative">
+            <div class="bg-stone-100 shadow-md w-full rounded-sm px-2 pb-2 outline-none text-indigo-950">
+                <label for="devToken" class="block text-sm">Dev API Token</label>
+                <input type="text" id="devToken" name="devToken" class="outline-none w-full" />
             </div>
             <div
                 class="w-2 absolute right-full top-0 mr-2 h-full rounded-full bg-indigo-500 group-focus-within:bg-amber-500 group-focus-within:scale-y-110 transition-all">

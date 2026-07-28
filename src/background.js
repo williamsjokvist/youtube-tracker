@@ -1,23 +1,37 @@
 let baseUrl = ""
 let token = ""
+let privateMode = false
 
 async function init() {
-    const { token: tk, backend } = await browser.storage.sync.get([
-        "token",
-        "backend",
-    ])
-    baseUrl = backend
-    token = tk
+    const { devMode, privateMode: priv, prodBackend, prodToken, devBackend, devToken } =
+        await chrome.storage.sync.get([
+            "devMode",
+            "privateMode",
+            "prodBackend",
+            "prodToken",
+            "devBackend",
+            "devToken",
+        ])
+    baseUrl = devMode ? devBackend : prodBackend
+    token = devMode ? devToken : prodToken
+    privateMode = Boolean(priv)
 }
 init()
 
 async function setActivity(token, videoId) {
+    if (privateMode) {
+        console.debug("Private mode enabled, not reporting activity: ", videoId)
+        return
+    }
     console.debug("Setting activity: ", videoId)
-    const res = await fetch(`${baseUrl}/activity/youtube/${videoId}`, {
-        method: "post",
-        headers: {
-            Authorization: token,
-        },
+    const res = await fetch(`${baseUrl}/internal/youtube`, {
+      method: "post",
+      body: {
+        id: videoId
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
     if (!res.ok) {
         throw new Error(await res.text())
@@ -30,26 +44,31 @@ function getVideoIdFromUrl(url) {
     const id = query.get("v")
 
     if (!id) {
-        return [null, new Error(`Video id not found in url ${url}`)]
+        throw new Error(`Video id not found in url ${url}`)
     }
 
-    return [id, null]
+    return id
 }
 
 // ---
-const urls = ["*://*.youtube.com/*"]
 const trackingTabs = new Set()
 
-browser.tabs.onActivated.addListener(onTabActivated)
-browser.tabs.onRemoved.addListener(onTabRemoved)
-browser.tabs.onUpdated.addListener(onTabUrlUpdated, {
-    urls,
-    properties: ["url"],
-})
-browser.tabs.onUpdated.addListener(onTabTitleUpdated, {
-    urls,
-    properties: ["title"],
-})
+function isYoutubeUrl(url) {
+    if (!url) {
+        return false
+    }
+    try {
+        const { hostname } = new URL(url)
+        return hostname === "youtube.com" || hostname.endsWith(".youtube.com")
+    } catch {
+        return false
+    }
+}
+
+chrome.tabs.onActivated.addListener(onTabActivated)
+chrome.tabs.onRemoved.addListener(onTabRemoved)
+chrome.tabs.onUpdated.addListener(onTabUrlUpdated)
+chrome.tabs.onUpdated.addListener(onTabTitleUpdated)
 
 function onTabRemoved(tabId, removeInfo) {
     console.debug("On tab removed", tabId)
@@ -65,35 +84,42 @@ async function onTabActivated(activeInfo) {
         return
     }
 
-    const tab = await browser.tabs.get(activeInfo.tabId)
-    const [videoId, err] = getVideoIdFromUrl(tab.url)
-    if (err !== null) {
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId)
+    if (!isYoutubeUrl(tab.url)) {
         return
     }
-
-    await postActivity(videoId)
+    const videoId = getVideoIdFromUrl(tab.url)
+    await setActivity(token, videoId)
+  } catch (err) {
+    console.error('onTabActivated', err)
+  }
 }
 
 async function onTabUrlUpdated(tabId, changeInfo, tabInfo) {
     console.debug("On tab url updated", tabId)
     const { url } = changeInfo
-    if (url === undefined || trackingTabs.has(tabId)) {
+    if (url === undefined || trackingTabs.has(tabId) || !isYoutubeUrl(url)) {
         return
     }
 
-    const [videoId, err] = getVideoIdFromUrl(tabInfo.url)
-    if (err !== null) {
-        return
-    }
+  try {
+    const videoId = getVideoIdFromUrl(tabInfo.url)
 
     trackingTabs.add(tabId)
 
     if (tabInfo.active) {
         await setActivity(token, videoId)
     }
+  } catch (err) {
+    console.error('onTabUrlUpdated', err)
+  }
 }
 
 async function onTabTitleUpdated(tabId, changeInfo, tabInfo) {
+    if (!isYoutubeUrl(tabInfo.url)) {
+        return
+    }
     console.debug("On tab title updated", tabId)
     const { title } = changeInfo
     if (title === undefined || !trackingTabs.has(tabId)) {
@@ -105,11 +131,10 @@ async function onTabTitleUpdated(tabId, changeInfo, tabInfo) {
         return
     }
 
-    const [videoId, err] = getVideoIdFromUrl(tabInfo.url)
-    if (err !== null) {
-        console.error("Error getting video id", err)
-        return
-    }
-
+  try {
+    const videoId = getVideoIdFromUrl(tabInfo.url)
     await setActivity(token, videoId)
+  } catch (err) {
+    console.error("onTabTitleUpdated", err)
+  }
 }
